@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        #quiz-container {
+            width: 500px;
+            margin: 50px auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        #question {
+            margin-bottom: 10px;
+        }
+
+        #options {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #options li {
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        #options li:hover {
+            background-color: #e0e0e0;
+        }
+
+        #result {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        #result img {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+
+        #score {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #score-text {
+            font-size: 18px;
+        }
+
+        #retry-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #retry-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <h2>Quiz App</h2>
+        <div id="question"></div>
+        <ul id="options"></ul>
+        <button id="next-btn" disabled>Next</button>
+        <div id="result">
+            <div id="score"></div>
+            <div id="score-text"></div>
+            <img id="win-gif" src="images/win.gif" alt="Winning GIF">
+            <img id="lose-gif" src="images/lose.gif" alt="Losing GIF">
+            
+            <button id="retry-btn">Retry</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz Data
+        const quizData = [
+            {
+                question: "What is the capital of France?",
+                options: ["Paris", "London", "Berlin", "Rome"],
+                answer: 0
+            },
+            {
+                question: "Who is the current President of the United States?",
+                options: ["Barack Obama", "Donald Trump", "Joe Biden", "George Bush"],
+                answer: 2
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Mars", "Venus", "Mercury", "Jupiter"],
+                answer: 0
+            }
+        ];
+
+        const threshold = 2; // Score threshold for winning
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        const quizContainer = document.getElementById('quiz-container');
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const resultElement = document.getElementById('result');
+        const scoreElement = document.getElementById('score');
+        const scoreTextElement = document.getElementById('score-text');
+        const winGifElement = document.getElementById('win-gif');
+        const loseGifElement = document.getElementById('lose-gif');
+        const retryButton = document.getElementById('retry-btn');
+        const nextButton = document.getElementById('next-btn');
+
+        function loadQuestion() {
+            const question = quizData[currentQuestion];
+            questionElement.textContent = question.question;
+
+            optionsElement.innerHTML = '';
+
+            for (let i = 0; i < question.options.length; i++) {
+                const li = document.createElement('li');
+                li.textContent = question.options[i];
+                li.addEventListener('click', checkAnswer);
+                optionsElement.appendChild(li);
+            }
+
+            nextButton.disabled = true;
+        }
+
+        function checkAnswer(event) {
+            const selectedOption = event.target;
+            const answer = quizData[currentQuestion].answer;
+            const isCorrect = selectedOption.textContent === quizData[currentQuestion].options[answer];
+            console.log(isCorrect);
+
+            if (isCorrect) {
+                score++;
+                selectedOption.style.backgroundColor = '#4CAF50';
+            } else {
+                selectedOption.style.backgroundColor = '#ff4d4d';
+            }
+
+            Array.from(optionsElement.children).forEach(option => {
+                if (option.textContent === quizData[currentQuestion].options[answer]) {
+                    option.style.backgroundColor = '#4CAF50';
+                }
+                option.removeEventListener('click', checkAnswer);
+            });
+
+            nextButton.disabled = false;
+        }
+
+        function showResult() {
+            quizContainer.style.display = 'none';
+            resultElement.style.display = 'block';
+            scoreElement.textContent = `Score: ${score}/${quizData.length}`;
+
+            if (score >= threshold) {
+                scoreTextElement.textContent = 'Congratulations! You won the quiz.';
+                winGifElement.src = 'images/win.gif';
+            } else {
+                scoreTextElement.textContent = 'Sorry! You lost the quiz.';
+                loseGifElement.src = 'images/lose.gif';
+            }
+        }
+
+        function retryQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            resultElement.style.display = 'none';
+            quizContainer.style.display = 'block';
+            loadQuestion();
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        retryButton.addEventListener('click', retryQuiz);
+        nextButton.addEventListener('click', nextQuestion);
+
+        loadQuestion();
+    </script>
+</body>
+</html>
